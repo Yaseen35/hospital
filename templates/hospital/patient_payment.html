@@ -1,0 +1,63 @@
+{% extends 'hospital/patient_base.html' %}
+{% load static %}
+{% block content %}
+
+<head>
+    <meta charset="utf-8">
+    <title>A simple, clean, and responsive HTML invoice template</title>
+  
+    <style>
+      .invoice-box {
+        max-width: 800px;
+        margin: auto;
+        padding: 50px;
+        border: 1px solid #eee;
+        box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+        font-size: 16px;
+        line-height: 24px;
+        font-family: 'Helvetica Neue', 'Helvetica', Helvetica, Arial, sans-serif;
+        color: #555;
+      }
+  
+      .menu {
+        top: 50px;
+      }
+  
+      
+    </style>
+
+  </head>
+  <div class="invoice-box">
+    <div class="container">
+        {% if status == 'success' %}
+            <h3><center>Thank you for your payment!</center></h3>
+            <p>Your payment has been processed successfully.</p>
+            <center><a href="{% url 'patient-discharge' %}" class="btn btn-primary">View Billing Details</a></center>
+        {% elif status == 'failed' %}
+            <h3><center>Payment Failed</center></h3>
+            <p><center>Unfortunately, your payment could not be verified. Please try again.</center></p>
+        {% else %}
+            <form action="{% url 'verify_payment' discharge_details.id %}" method="POST">
+                {% csrf_token %}
+                <script
+                    src="https://checkout.razorpay.com/v1/checkout.js"
+                    data-key="{{ razorpay_key_id }}"
+                    data-amount="{{ amount }}00"
+                    data-currency="INR"
+                    data-order_id="{{ razorpay_order_id }}"
+                    data-buttontext="Pay with Razorpay"
+                    data-name="Hospital"
+                    data-description="Patient Discharge Bill Payment"
+                    data-image="https://example.com/logo.png"
+                    data-prefill.name="{{ discharge_details.patientName }}"
+                    data-prefill.email="{{ discharge_details.patient.email }}"
+                    data-theme.color="#F37254"
+                ></script>
+                <input type="hidden" name="razorpay_payment_id" id="razorpay_payment_id">
+                <input type="hidden" name="razorpay_order_id" id="razorpay_order_id">
+                <input type="hidden" name="razorpay_signature" id="razorpay_signature">
+            </form>
+        {% endif %}
+    </div>
+  </div>
+{% endblock content %}
